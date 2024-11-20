@@ -483,11 +483,6 @@ Math_TVC_BLS_f <- getTVCmodel(
     ## 
     ## Beginning initial fit attempt
 
-    ## Running LGCM with TVC and TICs, Bilinear Spline Functional Form (random knot) with 40 parameters
-
-    ## 
-    ##  Lowest minimum so far:  47225.9173820968
-
     ## 
     ## Solution found
 
@@ -521,21 +516,6 @@ Math_TVCslp_BLS_f <- getTVCmodel(
 
     ## 
     ## Beginning initial fit attempt
-
-    ## Running LGCM with decomposed TVC and TICs, Bilinear Spline Functional Form (random knot) with 41 parameters
-
-    ## 
-    ##  Lowest minimum so far:  42269.2433734459
-
-    ##  OpenMx status code 6 not in list of acceptable status codes, (0)
-
-    ## 
-    ## Beginning fit attempt 1 of at maximum 10 extra tries
-
-    ## Running LGCM with decomposed TVC and TICs, Bilinear Spline Functional Form (random knot) with 41 parameters
-
-    ## 
-    ##  Lowest minimum so far:  42269.2433725129
 
     ## 
     ## Solution found
