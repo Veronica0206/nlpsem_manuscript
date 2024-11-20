@@ -1128,11 +1128,6 @@ Math_BLS_LGCM3 <-  getMIX(
     ## 
     ## Beginning initial fit attempt
 
-    ## Running Mixture Models without Cluster TICs with 35 parameters
-
-    ## 
-    ##  Lowest minimum so far:  31008.2964752792
-
     ## 
     ## Solution found
 
