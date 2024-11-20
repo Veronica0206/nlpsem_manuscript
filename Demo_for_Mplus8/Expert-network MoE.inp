@@ -1,0 +1,288 @@
+TITLE:      Expert-network MoE
+Data:       FILE = example_data.csv;
+VARIABLE:   NAMES = id Y1-Y10 T1-T10 gX1 gX2 class eX1 eX2; 
+            USEVAR = Y1-Y10 eX1 eX2;
+            CONSTRAINT = T1-T10;
+            CLASSES = c(2);
+ANALYSIS:   TYPE = MIXTURE;
+            ALGORITHM = EM;
+
+MODEL:      
+            %OVERALL%
+            eta0s BY Y1-Y10@1;
+            ! factor loadings for eta0s are set equal to 1
+            ! Factor loadings for eta1s and eta2s are not fixed values,
+            ! because they contain an estimate parameter, the fixed knot
+            eta1s BY Y1* (L11)
+                     Y2* (L12)
+                     Y3* (L13)
+                     Y4* (L14)
+                     Y5* (L15)
+                     Y6* (L16)
+                     Y7* (L17)
+                     Y8* (L18)
+                     Y9* (L19)
+                     Y10* (L110);
+            eta2s BY Y1* (L21)
+                     Y2* (L22)
+                     Y3* (L23)
+                     Y4* (L24)
+                     Y5* (L25)
+                     Y6* (L26)
+                     Y7* (L27)
+                     Y8* (L28)
+                     Y9* (L29)
+                     Y10* (L210);
+            
+            eta0s on eX1 (beta01s);
+            eta1s on eX1 (beta11s);
+            eta2s on eX1 (beta21s);
+
+            eta0s on eX2 (beta02s);
+            eta1s on eX2 (beta12s);
+            eta2s on eX2 (beta22s);
+
+            %c#1%
+            eta0s BY Y1-Y10@1;
+            eta1s BY Y1* (c1L11)
+                     Y2* (c1L12)
+                     Y3* (c1L13)
+                     Y4* (c1L14)
+                     Y5* (c1L15)
+                     Y6* (c1L16)
+                     Y7* (c1L17)
+                     Y8* (c1L18)
+                     Y9* (c1L19)
+                     Y10* (c1L110);
+            eta2s BY Y1* (c1L21)
+                     Y2* (c1L22)
+                     Y3* (c1L23)
+                     Y4* (c1L24)
+                     Y5* (c1L25)
+                     Y6* (c1L26)
+                     Y7* (c1L27)
+                     Y8* (c1L28)
+                     Y9* (c1L29)
+                     Y10* (c1L210);
+
+            ! Population values of parameters:
+            !! Original settings:
+            !! mueta0: 100, mueta1: -5, mueta2: -2.6, mug: 4.0
+            !! psi00: 25, psi01: 1.5, psi02: 1.5
+            !!            psi11: 1.0, psi12: 0.3
+            !!                        psi22: 1.0
+
+            !! Reparameterized settings:
+            !! mueta0s: 82.5, mueta1s: -3.8, mueta2s: 1.2, mug: 3.5
+            !! psi0s0s: 47.75, psi0s1s: 3.775, psi0s2s: -1.225
+            !!                 psi1s1s: 0.650, psi1s2s: 0.00
+            !!                                 psi2s2s: 0.35
+
+            !! beta: 0.8849, 0.1770, 0.1770
+            !!       1.3274, 0.2655, 0.2655
+
+            !! theta: 1.0
+
+            eta0s*50.0 (c1psi0s0s);
+            eta1s*0.6  (c1psi1s1s);
+            eta2s*0.4  (c1psi2s2s);
+
+            eta0s WITH eta1s*4.0 (c1psi0s1s);
+            eta0s WITH eta2s*-1.2 (c1psi0s2s);
+            eta1s WITH eta2s*0.2 (c1psi1s2s);
+
+            [eta0s*80]  (c1mueta0s);
+            [eta1s*-4]  (c1mueta1s);
+            [eta2s*1]   (c1mueta2s);
+
+            eta0s on eX1*0.8 (c1beta01s);
+            eta1s on eX1*0.2 (c1beta11s);
+            eta2s on eX1*0.2 (c1beta21s);
+
+            eta0s on eX2*1.3 (c1beta02s);
+            eta1s on eX2*0.3 (c1beta12s);
+            eta2s on eX2*0.3 (c1beta22s);
+            
+            eX1 eX2;
+            [eX1 eX2];
+            eX1 with eX2;
+
+            Y1-Y10*1.1 (c1theta);
+            [Y1-Y10@0];
+
+            %c#2%
+            eta0s BY Y1-Y10@1;
+            eta1s BY Y1* (c2L11)
+                     Y2* (c2L12)
+                     Y3* (c2L13)
+                     Y4* (c2L14)
+                     Y5* (c2L15)
+                     Y6* (c2L16)
+                     Y7* (c2L17)
+                     Y8* (c2L18)
+                     Y9* (c2L19)
+                     Y10* (c2L110);
+            eta2s BY Y1* (c2L21)
+                     Y2* (c2L22)
+                     Y3* (c2L23)
+                     Y4* (c2L24)
+                     Y5* (c2L25)
+                     Y6* (c2L26)
+                     Y7* (c2L27)
+                     Y8* (c2L28)
+                     Y9* (c2L29)
+                     Y10* (c2L210);
+            
+            ! Factor loadings for eta1s and eta2s are not fixed values,
+            ! because they contain an estimate parameter, the fixed knot
+
+            ! Population values of parameters:
+            !! Original settings:
+            !! mueta0: 100, mueta1: -5, mueta2: -3.4, mug: 5.0
+            !! psi00: 25, psi01: 1.5, psi02: 1.5
+            !!            psi11: 1.0, psi12: 0.3
+            !!                        psi22: 1.0
+
+            !! Reparameterized settings:
+            !! mueta0s: 72.5, mueta1s: -4.2, mueta2s: 0.8, mug: 5.5
+            !! psi0s0s: 71.750, psi0s1s: 5.075, psi0s2s: -1.925
+            !!                  psi1s1s: 0.650, psi1s2s: 0.000
+            !!                                  psi2s2s: 0.350
+
+            !! beta: 1.2515, 0.2503, 0.2503
+            !!       1.8773, 0.3755, 0.3755
+            
+            !! theta: 1.0
+            eta0s*70.0 (c2psi0s0s);
+            eta1s*0.6  (c2psi1s1s);
+            eta2s*0.4  (c2psi2s2s);
+
+            eta0s WITH eta1s*5.0 (c2psi0s1s);
+            eta0s WITH eta2s*-2.0 (c2psi0s2s);
+            eta1s WITH eta2s*0 (c2psi1s2s);
+
+            [eta0s*75]  (c2mueta0s);
+            [eta1s*-4]  (c2mueta1s);
+            [eta2s*1]   (c2mueta2s);
+
+            eta0s on eX1*1.2 (c2beta01s);
+            eta1s on eX1*0.3 (c2beta11s);
+            eta2s on eX1*0.3 (c2beta21s);
+
+            eta0s on eX2*1.8 (c2beta02s);
+            eta1s on eX2*0.4 (c2beta12s);
+            eta2s on eX2*0.4 (c2beta22s);
+            
+            eX1 eX2;
+            [eX1 eX2];
+            eX1 with eX2;
+
+            Y1-Y10*1.1 (c2theta);
+            [Y1-Y10@0];
+
+MODEL CONSTRAINT: 
+            ! In the model constraint, we have 3 parts:
+            ! Part I: Specify extra parameters other than those related to transformed LVs
+            new(c1mueta0 c1mueta1 c1mueta2 c1mug*3.5
+                c1psi00 c1psi01 c1psi02
+                        c1psi11 c1psi12
+                                c1psi22
+                c1beta01 c1beta11 c1beta21
+                c1beta02 c1beta12 c1beta22
+                  
+                c2mueta0 c2mueta1 c2mueta2 c2mug*5.5
+                c2psi00 c2psi01 c2psi02
+                        c2psi11 c2psi12
+                                c2psi22
+                c2beta01 c2beta11 c2beta21
+                c2beta02 c2beta12 c2beta22);
+            
+            ! Part II: Specify a series of equations to anti-transform the LVs
+            c1mueta0 = c1mueta0s + c1mug * (c1mueta2s - c1mueta1s);
+            c1mueta1 = c1mueta1s - c1mueta2s;
+            c1mueta2 = c1mueta1s + c1mueta2s;
+            c1psi00 = (c1psi1s1s + c1psi2s2s - 2 * c1psi1s2s) * c1mug^2 + 
+                     2 * (c1psi0s2s - c1psi0s1s) * c1mug + c1psi0s0s;
+            c1psi01 = (2 * c1psi1s2s - c1psi1s1s - c1psi2s2s) * c1mug + 
+                    (c1psi0s1s - c1psi0s2s);
+            c1psi02 = (c1psi2s2s - c1psi1s1s) * c1mug + 
+                    (c1psi0s1s + c1psi0s2s);
+            c1psi11 = c1psi1s1s + c1psi2s2s - 2 * c1psi1s2s;
+            c1psi12 = c1psi1s1s - c1psi2s2s;
+            c1psi22 = c1psi1s1s + c1psi2s2s + 2 * c1psi1s2s;
+
+            c1beta01 = c1beta01s + (c1beta21s - c1beta11s) * c1mug;
+            c1beta11 = c1beta11s - c1beta21s;
+            c1beta21 = c1beta11s + c1beta21s;
+
+            c1beta02 = c1beta02s + (c1beta22s - c1beta12s) * c1mug;
+            c1beta12 = c1beta12s - c1beta22s;
+            c1beta22 = c1beta12s + c1beta22s;
+
+            c2mueta0 = c2mueta0s + c2mug * (c2mueta2s - c2mueta1s);
+            c2mueta1 = c2mueta1s - c2mueta2s;
+            c2mueta2 = c2mueta1s + c2mueta2s;
+            c2psi00 = (c2psi1s1s + c2psi2s2s - 2 * c2psi1s2s) * c2mug^2 + 
+                     2 * (c2psi0s2s - c2psi0s1s) * c2mug + c2psi0s0s;
+            c2psi01 = (2 * c2psi1s2s - c2psi1s1s - c2psi2s2s) * c2mug + 
+                      (c2psi0s1s - c2psi0s2s);
+            c2psi02 = (c2psi2s2s - c2psi1s1s) * c2mug + 
+                      (c2psi0s1s + c2psi0s2s);
+            c2psi11 = c2psi1s1s + c2psi2s2s - 2 * c2psi1s2s;
+            c2psi12 = c2psi1s1s - c2psi2s2s;
+            c2psi22 = c2psi1s1s + c2psi2s2s + 2 * c2psi1s2s;
+
+            c2beta01 = c2beta01s + (c2beta21s - c2beta11s) * c2mug;
+            c2beta11 = c2beta11s - c2beta21s;
+            c2beta21 = c2beta11s + c2beta21s;
+
+            c2beta02 = c2beta02s + (c2beta22s - c2beta12s) * c2mug;
+            c2beta12 = c2beta12s - c2beta22s;
+            c2beta22 = c2beta12s + c2beta22s;
+
+            ! Part III: Define factor loadings for the 2nd and 3rd LVs with
+            ! definition variables
+            c1L11 = T1 - c1mug;
+            c1L12 = T2 - c1mug;
+            c1L13 = T3 - c1mug;
+            c1L14 = T4 - c1mug;
+            c1L15 = T5 - c1mug;
+            c1L16 = T6 - c1mug;
+            c1L17 = T7 - c1mug;
+            c1L18 = T8 - c1mug;
+            c1L19 = T9 - c1mug;
+            c1L110 = T10 - c1mug;
+
+            c1L21 = sqrt((T1 - c1mug)^2);
+            c1L22 = sqrt((T2 - c1mug)^2);
+            c1L23 = sqrt((T3 - c1mug)^2);
+            c1L24 = sqrt((T4 - c1mug)^2);
+            c1L25 = sqrt((T5 - c1mug)^2);
+            c1L26 = sqrt((T6 - c1mug)^2);
+            c1L27 = sqrt((T7 - c1mug)^2);
+            c1L28 = sqrt((T8 - c1mug)^2);
+            c1L29 = sqrt((T9 - c1mug)^2);
+            c1L210 = sqrt((T10 - c1mug)^2);
+
+            c2L11 = T1 - c2mug;
+            c2L12 = T2 - c2mug;
+            c2L13 = T3 - c2mug;
+            c2L14 = T4 - c2mug;
+            c2L15 = T5 - c2mug;
+            c2L16 = T6 - c2mug;
+            c2L17 = T7 - c2mug;
+            c2L18 = T8 - c2mug;
+            c2L19 = T9 - c2mug;
+            c2L110 = T10 - c2mug;
+
+            c2L21 = sqrt((T1 - c2mug)^2);
+            c2L22 = sqrt((T2 - c2mug)^2);
+            c2L23 = sqrt((T3 - c2mug)^2);
+            c2L24 = sqrt((T4 - c2mug)^2);
+            c2L25 = sqrt((T5 - c2mug)^2);
+            c2L26 = sqrt((T6 - c2mug)^2);
+            c2L27 = sqrt((T7 - c2mug)^2);
+            c2L28 = sqrt((T8 - c2mug)^2);
+            c2L29 = sqrt((T9 - c2mug)^2);
+            c2L210 = sqrt((T10 - c2mug)^2);
+ OUTPUT:    SAMPSTAT TECH1 TECH8;

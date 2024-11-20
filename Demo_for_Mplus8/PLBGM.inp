@@ -1,0 +1,154 @@
+TITLE:      Parallel Latent Basis Growth Model
+Data:       FILE = example_data.csv;
+VARIABLE:   NAMES = ID Y1-Y10 Z1-Z10 T1-T10; 
+            USEVAR = Y1-Y10 Z1-Z10;
+            CONSTRAINT = T1-T10;
+
+MODEL:      ! Latent true score
+            ly1 BY Y1@1;
+            ly2 BY Y2@1;
+            ly3 BY Y3@1;
+            ly4 BY Y4@1;
+            ly5 BY Y5@1;
+            ly6 BY Y6@1;
+            ly7 BY Y7@1;
+            ly8 BY Y8@1;
+            ly9 BY Y9@1;
+            ly10 BY Y10@1;
+
+            ly2-ly10@0;
+            [ly2-ly10@0];
+
+            lz1 BY Z1@1;
+            lz2 BY Z2@1;
+            lz3 BY Z3@1;
+            lz4 BY Z4@1;
+            lz5 BY Z5@1;
+            lz6 BY Z6@1;
+            lz7 BY Z7@1;
+            lz8 BY Z8@1;
+            lz9 BY Z9@1;
+            lz10 BY Z10@1;
+
+            lz2-lz10@0;
+            [lz2-lz10@0];
+
+            !! Autoregressions
+            ly2 ON ly1@1;
+            ly3 ON ly2@1;
+            ly4 ON ly3@1;
+            ly5 ON ly4@1;
+            ly6 ON ly5@1;
+            ly7 ON ly6@1;
+            ly8 ON ly7@1;
+            ly9 ON ly8@1;
+            ly10 ON ly9@1;
+
+            lz2 ON lz1@1;
+            lz3 ON lz2@1;
+            lz4 ON lz3@1;
+            lz5 ON lz4@1;
+            lz6 ON lz5@1;
+            lz7 ON lz6@1;
+            lz8 ON lz7@1;
+            lz9 ON lz8@1;
+            lz10 ON lz9@1;
+
+            !! Latent change scores
+            dy2 BY ly2* (lag2);
+            dy3 BY ly3* (lag3);
+            dy4 BY ly4* (lag4);
+            dy5 BY ly5* (lag5);
+            dy6 BY ly6* (lag6);
+            dy7 BY ly7* (lag7);
+            dy8 BY ly8* (lag8);
+            dy9 BY ly9* (lag9);
+            dy10 BY ly10* (lag10);
+            
+            dy2-dy10@0;
+            [dy2-dy10@0];
+
+            dz2 BY lz2* (lag2);
+            dz3 BY lz3* (lag3);
+            dz4 BY lz4* (lag4);
+            dz5 BY lz5* (lag5);
+            dz6 BY lz6* (lag6);
+            dz7 BY lz7* (lag7);
+            dz8 BY lz8* (lag8);
+            dz9 BY lz9* (lag9);
+            dz10 BY lz10* (lag10);
+            
+            dz2-dz10@0;
+            [dz2-dz10@0];
+            
+            eta1Y BY dy2@1
+                     dy3*1 (rel_rateY3)
+                     dy4*1 (rel_rateY4)
+                     dy5*1 (rel_rateY5)
+                     dy6*1 (rel_rateY6)
+                     dy7*1 (rel_rateY7)
+                     dy8*1 (rel_rateY8)
+                     dy9*1 (rel_rateY9)
+                     dy10*1 (rel_rateY10);
+       
+            eta1Z BY dz2@1
+                     dz3*1 (rel_rateZ3)
+                     dz4*1 (rel_rateZ4)
+                     dz5*1 (rel_rateZ5)
+                     dz6*1 (rel_rateZ6)
+                     dz7*1 (rel_rateZ7)
+                     dz8*1 (rel_rateZ8)
+                     dz9*1 (rel_rateZ9)
+                     dz10*1 (rel_rateZ10);
+            
+            
+            ly1*16  (psi0Y0Y);
+            eta1Y*1.0 (psi1Y1Y);
+            lz1*16  (psi0Z0Z);
+            eta1Z*1.0 (psi1Z1Z);
+
+            ly1 with eta1Y*1.5 (psi0Y1Y);
+            lz1 with eta1Z*1.5 (psi0Z1Z);
+            ly1 with eta1Z*1.5 (psi0Y1Z);
+            lz1 with eta1Y*1.5 (psi1Y0Z);
+
+            
+            [ly1*50]  (mueta0Y);
+            [eta1Y*2.5] (mueta1Y);
+            [lz1*50]  (mueta0Z);
+            [eta1Z*2.5] (mueta1Z);
+
+            Y1-Y10*1.0 (thetaY);
+            [Y1-Y10@0];
+            Z1-Z10*1.0 (thetaZ);
+            [Z1-Z10@0];
+
+            Y1 WITH Z1*0.3 (thetaYZ);
+            Y2 WITH Z2*0.3 (thetaYZ);
+            Y3 WITH Z3*0.3 (thetaYZ);
+            Y4 WITH Z4*0.3 (thetaYZ);
+            Y5 WITH Z5*0.3 (thetaYZ);
+            Y6 WITH Z6*0.3 (thetaYZ);
+            Y7 WITH Z7*0.3 (thetaYZ);
+            Y8 WITH Z8*0.3 (thetaYZ);
+            Y9 WITH Z9*0.3 (thetaYZ);
+            Y10 WITH Z10*0.3 (thetaYZ);
+
+
+
+
+
+MODEL CONSTRAINT: 
+            
+            ! Define time lag of each time interval
+            lag2 = T2 - T1;
+            lag3 = T3 - T2;
+            lag4 = T4 - T3;
+            lag5 = T5 - T4;
+            lag6 = T6 - T5;
+            lag7 = T7 - T6;
+            lag8 = T8 - T7;
+            lag9 = T9 - T8;
+            lag10 = T10 - T9;
+
+ OUTPUT:    SAMPSTAT;

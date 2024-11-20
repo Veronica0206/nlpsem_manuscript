@@ -1,0 +1,522 @@
+TITLE:      BLSGMM with an Unknown Fixed Knot, 1 TVC (interval-specific slopes), and 1 TIC
+Data:       FILE = GMMTVC3_BLS_dat.csv;
+VARIABLE:   NAMES = ID Y1-Y10 T1-T10 TVC1-TVC10 gx1 gx2 TIC; 
+            USEVAR = Y1-Y10 TVC1-TVC10 gx1 gx2 TIC;
+            CONSTRAINT = T1-T10;
+            CLASSES = c(2);
+ANALYSIS:   TYPE = MIXTURE;
+            ALGORITHM = EM;
+
+MODEL: 
+! Longitudinal outcome     
+            !! Factor loadings for eta0sY (measurement at knot) are set equal to 1
+            !! Factor loadings for eta1sY (average btw slope means) and eta2s (half 
+            !! diff btw means) are not fixed values, because they contain an estimate 
+            !! parameter, the fixed knot
+            %OVERALL%
+            eta0sY BY Y1-Y10@1;
+            eta1sY BY Y1* (L11)
+                      Y2* (L12)
+                      Y3* (L13)
+                      Y4* (L14)
+                      Y5* (L15)
+                      Y6* (L16)
+                      Y7* (L17)
+                      Y8* (L18)
+                      Y9* (L19)
+                      Y10* (L110);
+            eta2sY BY Y1* (L21)
+                      Y2* (L22)
+                      Y3* (L23)
+                      Y4* (L24)
+                      Y5* (L25)
+                      Y6* (L26)
+                      Y7* (L27)
+                      Y8* (L28)
+                      Y9* (L29)
+                      Y10* (L210);
+            
+            ! TVC
+            !! Path from true score to observed score            
+            lx1 BY TVC1@1;
+            lx2 BY TVC2@1;
+            lx3 BY TVC3@1;
+            lx4 BY TVC4@1;
+            lx5 BY TVC5@1;
+            lx6 BY TVC6@1;
+            lx7 BY TVC7@1;
+            lx8 BY TVC8@1;
+            lx9 BY TVC9@1;
+            lx10 BY TVC10@1;
+
+            lx2-lx10@0;
+            [lx2-lx10@0];
+
+            !! Path of autoregressions
+            lx2 ON lx1@1;
+            lx3 ON lx1@1;
+            lx4 ON lx1@1;
+            lx5 ON lx1@1;
+            lx6 ON lx1@1;
+            lx7 ON lx1@1;
+            lx8 ON lx1@1;
+            lx9 ON lx1@1;
+            lx10 ON lx1@1;
+
+            Deltax3 ON Deltax2@1;
+            Deltax4 ON Deltax3@1;
+            Deltax5 ON Deltax4@1;
+            Deltax6 ON Deltax5@1;
+            Deltax7 ON Deltax6@1;
+            Deltax8 ON Deltax7@1;
+            Deltax9 ON Deltax8@1;
+            Deltax10 ON Deltax9@1;
+
+            !! Path from latent change score to true score
+            Deltax2 BY lx2@1;
+            Deltax3 BY lx3@1;
+            Deltax4 BY lx4@1;
+            Deltax5 BY lx5@1;
+            Deltax6 BY lx6@1;
+            Deltax7 BY lx7@1;
+            Deltax8 BY lx8@1;
+            Deltax9 BY lx9@1;
+            Deltax10 BY lx10@1;
+
+            Deltax2-Deltax10@0;
+            [Deltax2-Deltax10@0];
+            
+            dx2 BY Deltax2* (lag2);
+            dx3 BY Deltax3* (lag3);
+            dx4 BY Deltax4* (lag4);
+            dx5 BY Deltax5* (lag5);
+            dx6 BY Deltax6* (lag6);
+            dx7 BY Deltax7* (lag7);
+            dx8 BY Deltax8* (lag8);
+            dx9 BY Deltax9* (lag9);
+            dx10 BY Deltax10* (lag10); 
+            
+            dx2-dx10@0;
+            [dx2-dx10@0]; 
+
+            !! Factor loadings of shape factor
+            eta1X BY dx2@1
+                     dx3*1 (rel_rateX3)
+                     dx4*1 (rel_rateX4)
+                     dx5*1 (rel_rateX5)
+                     dx6*1 (rel_rateX6)
+                     dx7*1 (rel_rateX7)
+                     dx8*1 (rel_rateX8)
+                     dx9*1 (rel_rateX9)
+                     dx10*1 (rel_rateX10);
+
+            !! Relationship between initial trait and TIC
+            [TIC];
+            lx1 WITH TIC;
+
+            ! Regression of Y1-Y10 on decomposed TVC and ITC
+            !! Path from TIC to growth factors of longitudinal outcome
+            eta0sY ON TIC (betaTIC0s);
+            eta1sY ON TIC (betaTIC1s);
+            eta2sY ON TIC (betaTIC2s);
+
+            !! Baseline effect
+            !! Path from initial trait to growth factors of longitudinal outcome
+            eta0sY ON lx1 (betaTVC0s);
+            eta1sY ON lx1 (betaTVC1s);
+            eta2sY ON lx1 (betaTVC2s);
+
+            !! Temporal effect
+            !! Path from temporal state to growth factors of longitudinal outcome
+            Y2 ON Deltax2 (kappa);
+            Y3 ON Deltax3 (kappa);
+            Y4 ON Deltax4 (kappa);
+            Y5 ON Deltax5 (kappa);
+            Y6 ON Deltax6 (kappa);
+            Y7 ON Deltax7 (kappa);
+            Y8 ON Deltax8 (kappa);
+            Y9 ON Deltax9 (kappa);
+            Y10 ON Deltax10 (kappa);
+
+
+            c on gx1 gx2;
+            
+            %c#1%
+            eta0sY BY Y1-Y10@1;
+            eta1sY BY Y1* (c1L11)
+                      Y2* (c1L12)
+                      Y3* (c1L13)
+                      Y4* (c1L14)
+                      Y5* (c1L15)
+                      Y6* (c1L16)
+                      Y7* (c1L17)
+                      Y8* (c1L18)
+                      Y9* (c1L19)
+                      Y10* (c1L110);
+            eta2sY BY Y1* (c1L21)
+                      Y2* (c1L22)
+                      Y3* (c1L23)
+                      Y4* (c1L24)
+                      Y5* (c1L25)
+                      Y6* (c1L26)
+                      Y7* (c1L27)
+                      Y8* (c1L28)
+                      Y9* (c1L29)
+                      Y10* (c1L210);            
+
+            !! Path from latent change score to true score
+            dx2 BY Deltax2* (c1lag2);
+            dx3 BY Deltax3* (c1lag3);
+            dx4 BY Deltax4* (c1lag4);
+            dx5 BY Deltax5* (c1lag5);
+            dx6 BY Deltax6* (c1lag6);
+            dx7 BY Deltax7* (c1lag7);
+            dx8 BY Deltax8* (c1lag8);
+            dx9 BY Deltax9* (c1lag9);
+            dx10 BY Deltax10* (c1lag10); 
+            
+            dx2-dx10@0;
+            [dx2-dx10@0];
+
+            !! Relationship between initial trait and TIC
+            [TIC];
+            lx1 WITH TIC;
+            
+            !! Mean vector of growth factors
+            [eta0sY*110]  (c1mueta0sY);
+            [eta1sY*2.5]  (c1mueta1sY);
+            [eta2sY*-1.5]  (c1mueta2sY);
+
+            !! Var-cov of growth factors            
+            eta0sY*32.0 (c1psi0sY0sY)
+            eta1sY*0.45  (c1psi1sY1sY)
+            eta2sY*0.45  (c1psi2sY2sY);
+
+            eta0sY WITH eta1sY (c1psi0sY1sY);
+            eta0sY WITH eta2sY (c1psi0sY2sY);
+            eta1sY WITH eta2sY (c1psi1sY2sY);
+
+            !! Resuduals
+            Y1-Y10*1.0 (c1thetaY);
+            [Y1-Y10@0];
+
+            !! Factor loadings of shape factor
+            eta1X BY dx2@1
+                     dx3*1 (c1rel_rateX3)
+                     dx4*1 (c1rel_rateX4)
+                     dx5*1 (c1rel_rateX5)
+                     dx6*1 (c1rel_rateX6)
+                     dx7*1 (c1rel_rateX7)
+                     dx8*1 (c1rel_rateX8)
+                     dx9*1 (c1rel_rateX9)
+                     dx10*1 (c1rel_rateX10);
+
+            !! Mean vector of growth factors       
+            [lx1*10]  (c1mueta0X);
+            [eta1X*5] (c1mueta1X);
+
+            !! Var-cov vector of growth factors
+            lx1*16  (c1psi0X0X);
+            eta1X*1 (c1psi1X1X);
+
+            lx1 with eta1X*1.5 (c1psi0X1X);
+            
+            !! Resuduals
+            TVC1-TVC10*1.0 (c1thetaX);
+            [TVC1-TVC10@0];
+            
+            ! Regression of Y1-Y10 on decomposed TVC and ITC
+            !! Path from TIC to growth factors of longitudinal outcome
+            eta0sY ON TIC (c1betaTIC0s);
+            eta1sY ON TIC (c1betaTIC1s);
+            eta2sY ON TIC (c1betaTIC2s);
+
+            !! Baseline effect
+            !! Path from initial trait to growth factors of longitudinal outcome
+            eta0sY ON lx1 (c1betaTVC0s);
+            eta1sY ON lx1 (c1betaTVC1s);
+            eta2sY ON lx1 (c1betaTVC2s);
+
+            !! Temporal effect
+            !! Path from temporal state to growth factors of longitudinal outcome
+            Y2 ON Deltax2 (c1kappa);
+            Y3 ON Deltax3 (c1kappa);
+            Y4 ON Deltax4 (c1kappa);
+            Y5 ON Deltax5 (c1kappa);
+            Y6 ON Deltax6 (c1kappa);
+            Y7 ON Deltax7 (c1kappa);
+            Y8 ON Deltax8 (c1kappa);
+            Y9 ON Deltax9 (c1kappa);
+            Y10 ON Deltax10 (c1kappa);
+
+            !! Covariance between residuals
+            TVC1 WITH Y1*0.3 (c1thetaXY);
+            TVC2 WITH Y2*0.3 (c1thetaXY);
+            TVC3 WITH Y3*0.3 (c1thetaXY);
+            TVC4 WITH Y4*0.3 (c1thetaXY);
+            TVC5 WITH Y5*0.3 (c1thetaXY);
+            TVC6 WITH Y6*0.3 (c1thetaXY);
+            TVC7 WITH Y7*0.3 (c1thetaXY);
+            TVC8 WITH Y8*0.3 (c1thetaXY);
+            TVC9 WITH Y9*0.3 (c1thetaXY);
+            TVC10 WITH Y10*0.3 (c1thetaXY);
+
+            %c#2%
+            eta0sY BY Y1-Y10@1;
+            eta1sY BY Y1* (c2L11)
+                      Y2* (c2L12)
+                      Y3* (c2L13)
+                      Y4* (c2L14)
+                      Y5* (c2L15)
+                      Y6* (c2L16)
+                      Y7* (c2L17)
+                      Y8* (c2L18)
+                      Y9* (c2L19)
+                      Y10* (c2L110);
+            eta2sY BY Y1* (c2L21)
+                      Y2* (c2L22)
+                      Y3* (c2L23)
+                      Y4* (c2L24)
+                      Y5* (c2L25)
+                      Y6* (c2L26)
+                      Y7* (c2L27)
+                      Y8* (c2L28)
+                      Y9* (c2L29)
+                      Y10* (c2L210);
+
+            !! Path from latent change score to true score
+            dx2 BY Deltax2* (c2lag2);
+            dx3 BY Deltax3* (c2lag3);
+            dx4 BY Deltax4* (c2lag4);
+            dx5 BY Deltax5* (c2lag5);
+            dx6 BY Deltax6* (c2lag6);
+            dx7 BY Deltax7* (c2lag7);
+            dx8 BY Deltax8* (c2lag8);
+            dx9 BY Deltax9* (c2lag9);
+            dx10 BY Deltax10* (c2lag10);
+            
+            dx2-dx10@0;
+            [dx2-dx10@0];
+
+            !! Relationship between initial trait and TIC
+            [TIC];
+            lx1 WITH TIC;
+            
+            !! Mean vector of growth factors
+            [eta0sY*110]  (c2mueta0sY);
+            [eta1sY*2.5]  (c2mueta1sY);
+            [eta2sY*-1.5]  (c2mueta2sY);
+
+            !! Var-cov of growth factors            
+            eta0sY*32.0 (c2psi0sY0sY)
+            eta1sY*0.45  (c2psi1sY1sY)
+            eta2sY*0.45  (c2psi2sY2sY);
+
+            eta0sY WITH eta1sY (c2psi0sY1sY);
+            eta0sY WITH eta2sY (c2psi0sY2sY);
+            eta1sY WITH eta2sY (c2psi1sY2sY);
+
+            !! Resuduals
+            Y1-Y10*1.0 (c2thetaY);
+            [Y1-Y10@0];
+
+            !! Factor loadings of shape factor
+            eta1X BY dx2@1
+                     dx3*1 (c2rel_rateX3)
+                     dx4*1 (c2rel_rateX4)
+                     dx5*1 (c2rel_rateX5)
+                     dx6*1 (c2rel_rateX6)
+                     dx7*1 (c2rel_rateX7)
+                     dx8*1 (c2rel_rateX8)
+                     dx9*1 (c2rel_rateX9)
+                     dx10*1 (c2rel_rateX10);
+
+            !! Mean vector of growth factors       
+            [lx1*10]  (c2mueta0X);
+            [eta1X*5] (c2mueta1X);
+
+            !! Var-cov vector of growth factors
+            lx1*16  (c2psi0X0X);
+            eta1X*1 (c2psi1X1X);
+
+            lx1 with eta1X*1.5 (c2psi0X1X);
+            
+            !! Resuduals
+            TVC1-TVC10*1.0 (c2thetaX);
+            [TVC1-TVC10@0];
+            
+            ! Regression of Y1-Y10 on decomposed TVC and ITC
+            !! Path from TIC to growth factors of longitudinal outcome
+            eta0sY ON TIC (c2betaTIC0s);
+            eta1sY ON TIC (c2betaTIC1s);
+            eta2sY ON TIC (c2betaTIC2s);
+
+            !! Baseline effect
+            !! Path from initial trait to growth factors of longitudinal outcome
+            eta0sY ON lx1 (c2betaTVC0s);
+            eta1sY ON lx1 (c2betaTVC1s);
+            eta2sY ON lx1 (c2betaTVC2s);
+
+            !! Temporal effect
+            !! Path from temporal state to growth factors of longitudinal outcome
+            Y2 ON Deltax2 (c2kappa);
+            Y3 ON Deltax3 (c2kappa);
+            Y4 ON Deltax4 (c2kappa);
+            Y5 ON Deltax5 (c2kappa);
+            Y6 ON Deltax6 (c2kappa);
+            Y7 ON Deltax7 (c2kappa);
+            Y8 ON Deltax8 (c2kappa);
+            Y9 ON Deltax9 (c2kappa);
+            Y10 ON Deltax10 (c2kappa);
+
+            !! Covariance between residuals
+            TVC1 WITH Y1*0.3 (c2thetaXY);
+            TVC2 WITH Y2*0.3 (c2thetaXY);
+            TVC3 WITH Y3*0.3 (c2thetaXY);
+            TVC4 WITH Y4*0.3 (c2thetaXY);
+            TVC5 WITH Y5*0.3 (c2thetaXY);
+            TVC6 WITH Y6*0.3 (c2thetaXY);
+            TVC7 WITH Y7*0.3 (c2thetaXY);
+            TVC8 WITH Y8*0.3 (c2thetaXY);
+            TVC9 WITH Y9*0.3 (c2thetaXY);
+            TVC10 WITH Y10*0.3 (c2thetaXY);
+
+MODEL CONSTRAINT: 
+! In the model constraint part, we have 4 parts:
+            !! Part I: Define time lag of each time interval
+            c1lag2 = T2 - T1;
+            c1lag3 = T3 - T2;
+            c1lag4 = T4 - T3;
+            c1lag5 = T5 - T4;
+            c1lag6 = T6 - T5;
+            c1lag7 = T7 - T6;
+            c1lag8 = T8 - T7;
+            c1lag9 = T9 - T8;
+            c1lag10 = T10 - T9;
+
+            c2lag2 = T2 - T1;
+            c2lag3 = T3 - T2;
+            c2lag4 = T4 - T3;
+            c2lag5 = T5 - T4;
+            c2lag6 = T6 - T5;
+            c2lag7 = T7 - T6;
+            c2lag8 = T8 - T7;
+            c2lag9 = T9 - T8;
+            c2lag10 = T10 - T9;
+
+            !! Part II: Specify parameters related to transformed LVs
+            new(c1mueta0Y c1mueta1Y c1mueta2Y c1mugY*4.5
+                c1psi0Y0Y c1psi0Y1Y c1psi0Y2Y
+                          c1psi1Y1Y c1psi1Y2Y
+                                    c1psi2Y2Y
+                c1betaTIC0 c1betaTIC1 c1betaTIC2
+                c1betaTVC0 c1betaTVC1 c1betaTVC2
+                c2mueta0Y c2mueta1Y c2mueta2Y c2mugY*4.5
+                c2psi0Y0Y c2psi0Y1Y c2psi0Y2Y
+                          c2psi1Y1Y c2psi1Y2Y
+                                    c2psi2Y2Y
+                c2betaTIC0 c2betaTIC1 c2betaTIC2
+                c2betaTVC0 c2betaTVC1 c2betaTVC2);
+            
+            !! Part III: Specify a series of equations to anti-transform the LVs
+            c1mueta0Y = c1mueta0sY + c1mugY * (c1mueta2sY - c1mueta1sY);
+            c1mueta1Y = c1mueta1sY - c1mueta2sY;
+            c1mueta2Y = c1mueta1sY + c1mueta2sY;
+            c1psi0Y0Y = (c1psi1sY1sY + c1psi2sY2sY - 2 * c1psi1sY2sY) * c1mugY^2 + 
+                        2 * (c1psi0sY2sY - c1psi0sY1sY) * c1mugY + c1psi0sY0sY;
+            c1psi0Y1Y = (2 * c1psi1sY2sY - c1psi1sY1sY - c1psi2sY2sY) * c1mugY + 
+                        (c1psi0sY1sY - c1psi0sY2sY);
+            c1psi0Y2Y = (c1psi2sY2sY - c1psi1sY1sY) * c1mugY + 
+                        (c1psi0sY1sY + c1psi0sY2sY);
+            c1psi1Y1Y = c1psi1sY1sY + c1psi2sY2sY - 2 * c1psi1sY2sY;
+            c1psi1Y2Y = c1psi1sY1sY - c1psi2sY2sY;
+            c1psi2Y2Y = c1psi1sY1sY + c1psi2sY2sY + 2 * c1psi1sY2sY;
+
+            c1betaTIC0 = c1betaTIC0s + (c1betaTIC2s - c1betaTIC1s) * c1mugY;
+            c1betaTIC1 = c1betaTIC1s - c1betaTIC2s;
+            c1betaTIC2 = c1betaTIC1s + c1betaTIC2s;
+
+            c1betaTVC0 = c1betaTVC0s + (c1betaTVC2s - c1betaTVC1s) * c1mugY;
+            c1betaTVC1 = c1betaTVC1s - c1betaTVC2s;
+            c1betaTVC2 = c1betaTVC1s + c1betaTVC2s;
+
+            c2mueta0Y = c2mueta0sY + c2mugY * (c2mueta2sY - c2mueta1sY);
+            c2mueta1Y = c2mueta1sY - c2mueta2sY;
+            c2mueta2Y = c2mueta1sY + c2mueta2sY;
+            c2psi0Y0Y = (c2psi1sY1sY + c2psi2sY2sY - 2 * c2psi1sY2sY) * c2mugY^2 + 
+                        2 * (c2psi0sY2sY - c2psi0sY1sY) * c2mugY + c2psi0sY0sY;
+            c2psi0Y1Y = (2 * c2psi1sY2sY - c2psi1sY1sY - c2psi2sY2sY) * c2mugY + 
+                        (c2psi0sY1sY - c2psi0sY2sY);
+            c2psi0Y2Y = (c2psi2sY2sY - c2psi1sY1sY) * c2mugY + 
+                        (c2psi0sY1sY + c2psi0sY2sY);
+            c2psi1Y1Y = c2psi1sY1sY + c2psi2sY2sY - 2 * c2psi1sY2sY;
+            c2psi1Y2Y = c2psi1sY1sY - c2psi2sY2sY;
+            c2psi2Y2Y = c2psi1sY1sY + c2psi2sY2sY + 2 * c2psi1sY2sY;
+
+            c2betaTIC0 = c2betaTIC0s + (c2betaTIC2s - c2betaTIC1s) * c2mugY;
+            c2betaTIC1 = c2betaTIC1s - c2betaTIC2s;
+            c2betaTIC2 = c2betaTIC1s + c2betaTIC2s;
+
+            c2betaTVC0 = c2betaTVC0s + (c2betaTVC2s - c2betaTVC1s) * c2mugY;
+            c2betaTVC1 = c2betaTVC1s - c2betaTVC2s;
+            c2betaTVC2 = c2betaTVC1s + c2betaTVC2s;
+
+            !! Part IV: Define factor loadings for the 2nd and 3rd LVs with
+            !! definition variables
+            c1L11 = T1 - c1mugY;
+            c1L12 = T2 - c1mugY;
+            c1L13 = T3 - c1mugY;
+            c1L14 = T4 - c1mugY;
+            c1L15 = T5 - c1mugY;
+            c1L16 = T6 - c1mugY;
+            c1L17 = T7 - c1mugY;
+            c1L18 = T8 - c1mugY;
+            c1L19 = T9 - c1mugY;
+            c1L110 = T10 - c1mugY;
+
+            c1L21 = sqrt((T1 - c1mugY)^2);
+            c1L22 = sqrt((T2 - c1mugY)^2);
+            c1L23 = sqrt((T3 - c1mugY)^2);
+            c1L24 = sqrt((T4 - c1mugY)^2);
+            c1L25 = sqrt((T5 - c1mugY)^2);
+            c1L26 = sqrt((T6 - c1mugY)^2);
+            c1L27 = sqrt((T7 - c1mugY)^2);
+            c1L28 = sqrt((T8 - c1mugY)^2);
+            c1L29 = sqrt((T9 - c1mugY)^2);
+            c1L210 = sqrt((T10 - c1mugY)^2);
+
+            c2L11 = T1 - c2mugY;
+            c2L12 = T2 - c2mugY;
+            c2L13 = T3 - c2mugY;
+            c2L14 = T4 - c2mugY;
+            c2L15 = T5 - c2mugY;
+            c2L16 = T6 - c2mugY;
+            c2L17 = T7 - c2mugY;
+            c2L18 = T8 - c2mugY;
+            c2L19 = T9 - c2mugY;
+            c2L110 = T10 - c2mugY;
+
+            c2L21 = sqrt((T1 - c2mugY)^2);
+            c2L22 = sqrt((T2 - c2mugY)^2);
+            c2L23 = sqrt((T3 - c2mugY)^2);
+            c2L24 = sqrt((T4 - c2mugY)^2);
+            c2L25 = sqrt((T5 - c2mugY)^2);
+            c2L26 = sqrt((T6 - c2mugY)^2);
+            c2L27 = sqrt((T7 - c2mugY)^2);
+            c2L28 = sqrt((T8 - c2mugY)^2);
+            c2L29 = sqrt((T9 - c2mugY)^2);
+            c2L210 = sqrt((T10 - c2mugY)^2);
+
+ OUTPUT:    SAMPSTAT TECH1 TECH8;
+
+
+
+
+
+
+
+
+
+
+
+            

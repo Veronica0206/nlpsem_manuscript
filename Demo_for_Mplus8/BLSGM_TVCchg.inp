@@ -1,0 +1,249 @@
+TITLE:      BLSGM with an Unknown Fixed Knot, 1 TVC (interval-specific changes), and 1 TIC
+Data:       FILE = TVC2_BLS_dat.csv;
+VARIABLE:   NAMES = ID Y1-Y10 T1-T10 TVC1-TVC10 TIC; 
+            USEVAR = Y1-Y10 TVC1-TVC10 TIC;
+            CONSTRAINT = T1-T10;
+
+MODEL: 
+! Longitudinal outcome     
+            !! Factor loadings for eta0sY (measurement at knot) are set equal to 1
+            !! Factor loadings for eta1sY (average btw slope means) and eta2s (half 
+            !! diff btw means) are not fixed values, because they contain an estimate 
+            !! parameter, the fixed knot
+            eta0sY BY Y1-Y10@1;
+            eta1sY BY Y1* (L11)
+                      Y2* (L12)
+                      Y3* (L13)
+                      Y4* (L14)
+                      Y5* (L15)
+                      Y6* (L16)
+                      Y7* (L17)
+                      Y8* (L18)
+                      Y9* (L19)
+                      Y10* (L110);
+            eta2sY BY Y1* (L21)
+                      Y2* (L22)
+                      Y3* (L23)
+                      Y4* (L24)
+                      Y5* (L25)
+                      Y6* (L26)
+                      Y7* (L27)
+                      Y8* (L28)
+                      Y9* (L29)
+                      Y10* (L210);
+
+            !! Mean vector of growth factors
+            [eta0sY*110]  (mueta0sY);
+            [eta1sY*2.5]  (mueta1sY);
+            [eta2sY*-1.5]  (mueta2sY);
+
+            !! Var-cov of growth factors            
+            eta0sY*32.0 (psi0sY0sY)
+            eta1sY*0.45  (psi1sY1sY)
+            eta2sY*0.45  (psi2sY2sY);
+
+            eta0sY WITH eta1sY (psi0sY1sY);
+            eta0sY WITH eta2sY (psi0sY2sY);
+            eta1sY WITH eta2sY (psi1sY2sY);
+
+            !! Resuduals
+            Y1-Y10*1.0 (thetaY);
+            [Y1-Y10@0];
+
+	    ! TVC
+            !! Path from true score to observed score            
+            lx1 BY TVC1@1;
+            lx2 BY TVC2@1;
+            lx3 BY TVC3@1;
+            lx4 BY TVC4@1;
+            lx5 BY TVC5@1;
+            lx6 BY TVC6@1;
+            lx7 BY TVC7@1;
+            lx8 BY TVC8@1;
+            lx9 BY TVC9@1;
+            lx10 BY TVC10@1;
+
+            lx2-lx10@0;
+            [lx2-lx10@0];
+
+            !! Path of autoregressions
+            lx2 ON lx1@1;
+            lx3 ON lx2@1;
+            lx4 ON lx3@1;
+            lx5 ON lx4@1;
+            lx6 ON lx5@1;
+            lx7 ON lx6@1;
+            lx8 ON lx7@1;
+            lx9 ON lx8@1;
+            lx10 ON lx9@1;
+
+            !! Path from latent change score to true score
+            deltax2 BY lx2@1;
+            deltax3 BY lx3@1;
+            deltax4 BY lx4@1;
+            deltax5 BY lx5@1;
+            deltax6 BY lx6@1;
+            deltax7 BY lx7@1;
+            deltax8 BY lx8@1;
+            deltax9 BY lx9@1;
+            deltax10 BY lx10@1;
+
+            deltax2-deltax10@0;
+            [deltax2-deltax10@0];
+            
+            dx2 BY deltax2* (lag2);
+            dx3 BY deltax3* (lag3);
+            dx4 BY deltax4* (lag4);
+            dx5 BY deltax5* (lag5);
+            dx6 BY deltax6* (lag6);
+            dx7 BY deltax7* (lag7);
+            dx8 BY deltax8* (lag8);
+            dx9 BY deltax9* (lag9);
+            dx10 BY deltax10* (lag10); 
+            
+            dx2-dx10@0;
+            [dx2-dx10@0]; 
+            
+            !! Factor loadings of shape factor
+            eta1X BY dx2@1
+                     dx3*1 (rel_rateX3)
+                     dx4*1 (rel_rateX4)
+                     dx5*1 (rel_rateX5)
+                     dx6*1 (rel_rateX6)
+                     dx7*1 (rel_rateX7)
+                     dx8*1 (rel_rateX8)
+                     dx9*1 (rel_rateX9)
+                     dx10*1 (rel_rateX10);
+
+            !! Mean vector of growth factors       
+            [lx1*10]  (mueta0X);
+            [eta1X*5] (mueta1X);
+
+            !! Var-cov vector of growth factors
+            lx1*16  (psi0X0X);
+            eta1X*1 (psi1X1X);
+
+            lx1 with eta1X*1.5 (psi0X1X);
+            
+            !! Resuduals
+            TVC1-TVC10*1.0 (thetaX);
+            [TVC1-TVC10@0];
+            
+! Regression of Y1-Y10 on decomposed TVC and ITC
+            !! Path from TIC to growth factors of longitudinal outcome
+            eta0sY ON TIC (betaTIC0s);
+            eta1sY ON TIC (betaTIC1s);
+            eta2sY ON TIC (betaTIC2s);
+
+            !! Baseline effect
+            !! Path from initial trait to growth factors of longitudinal outcome
+            eta0sY ON lx1 (betaTVC0s);
+            eta1sY ON lx1 (betaTVC1s);
+            eta2sY ON lx1 (betaTVC2s);
+
+            !! Temporal effect
+            !! Path from temporal state to growth factors of longitudinal outcome
+            Y2 ON deltax2 (kappa);
+            Y3 ON deltax3 (kappa);
+            Y4 ON deltax4 (kappa);
+            Y5 ON deltax5 (kappa);
+            Y6 ON deltax6 (kappa);
+            Y7 ON deltax7 (kappa);
+            Y8 ON deltax8 (kappa);
+            Y9 ON deltax9 (kappa);
+            Y10 ON deltax10 (kappa);
+
+            !! Covariance between residuals
+            TVC1 WITH Y1*0.3 (thetaXY);
+            TVC2 WITH Y2*0.3 (thetaXY);
+            TVC3 WITH Y3*0.3 (thetaXY);
+            TVC4 WITH Y4*0.3 (thetaXY);
+            TVC5 WITH Y5*0.3 (thetaXY);
+            TVC6 WITH Y6*0.3 (thetaXY);
+            TVC7 WITH Y7*0.3 (thetaXY);
+            TVC8 WITH Y8*0.3 (thetaXY);
+            TVC9 WITH Y9*0.3 (thetaXY);
+            TVC10 WITH Y10*0.3 (thetaXY);
+
+            !! Relationship between initial trait and TIC
+            [TIC];
+            lx1 WITH TIC;
+
+MODEL CONSTRAINT: 
+! In the model constraint part, we have 4 parts:
+            !! Part I: Define time lag of each time interval
+            lag2 = T2 - T1;
+            lag3 = T3 - T2;
+            lag4 = T4 - T3;
+            lag5 = T5 - T4;
+            lag6 = T6 - T5;
+            lag7 = T7 - T6;
+            lag8 = T8 - T7;
+            lag9 = T9 - T8;
+            lag10 = T10 - T9;
+
+            !! Part II: Specify parameters related to transformed LVs
+            new(mueta0Y mueta1Y mueta2Y mugY*4.5
+                psi0Y0Y psi0Y1Y psi0Y2Y
+                        psi1Y1Y psi1Y2Y
+                                psi2Y2Y
+                betaTIC0 betaTIC1 betaTIC2
+                betaTVC0 betaTVC1 betaTVC2);
+            
+            !! Part III: Specify a series of equations to anti-transform the LVs
+            mueta0Y = mueta0sY + mugY * (mueta2sY - mueta1sY);
+            mueta1Y = mueta1sY - mueta2sY;
+            mueta2Y = mueta1sY + mueta2sY;
+            psi0Y0Y = (psi1sY1sY + psi2sY2sY - 2 * psi1sY2sY) * mugY^2 + 
+                      2 * (psi0sY2sY - psi0sY1sY) * mugY + psi0sY0sY;
+            psi0Y1Y = (2 * psi1sY2sY - psi1sY1sY - psi2sY2sY) * mugY + 
+                      (psi0sY1sY - psi0sY2sY);
+            psi0Y2Y = (psi2sY2sY - psi1sY1sY) * mugY + (psi0sY1sY + psi0sY2sY);
+            psi1Y1Y = psi1sY1sY + psi2sY2sY - 2 * psi1sY2sY;
+            psi1Y2Y = psi1sY1sY - psi2sY2sY;
+            psi2Y2Y = psi1sY1sY + psi2sY2sY + 2 * psi1sY2sY;
+
+            betaTIC0 = betaTIC0s + (betaTIC2s - betaTIC1s) * mugY;
+            betaTIC1 = betaTIC1s - betaTIC2s;
+            betaTIC2 = betaTIC1s + betaTIC2s;
+
+            betaTVC0 = betaTVC0s + (betaTVC2s - betaTVC1s) * mugY;
+            betaTVC1 = betaTVC1s - betaTVC2s;
+            betaTVC2 = betaTVC1s + betaTVC2s;
+
+            !! Part IV: Define factor loadings for the 2nd and 3rd LVs with
+            !! definition variables
+            L11 = T1 - mugY;
+            L12 = T2 - mugY;
+            L13 = T3 - mugY;
+            L14 = T4 - mugY;
+            L15 = T5 - mugY;
+            L16 = T6 - mugY;
+            L17 = T7 - mugY;
+            L18 = T8 - mugY;
+            L19 = T9 - mugY;
+            L110 = T10 - mugY;
+
+            L21 = sqrt((T1 - mugY)^2);
+            L22 = sqrt((T2 - mugY)^2);
+            L23 = sqrt((T3 - mugY)^2);
+            L24 = sqrt((T4 - mugY)^2);
+            L25 = sqrt((T5 - mugY)^2);
+            L26 = sqrt((T6 - mugY)^2);
+            L27 = sqrt((T7 - mugY)^2);
+            L28 = sqrt((T8 - mugY)^2);
+            L29 = sqrt((T9 - mugY)^2);
+            L210 = sqrt((T10 - mugY)^2);
+ OUTPUT:    SAMPSTAT;
+
+
+
+
+
+
+
+
+
+
+
+            

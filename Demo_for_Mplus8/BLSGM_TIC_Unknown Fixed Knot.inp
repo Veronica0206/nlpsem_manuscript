@@ -1,0 +1,147 @@
+TITLE:      BLSGM-TICs with an Unknown Fixed Knot
+Data:       FILE = example_data.csv;
+VARIABLE:   NAMES = id Y1-Y10 T1-T10 gamma X1-X2; 
+            USEVAR = Y1-Y10 X1-X2;
+            CONSTRAINT = T1-T10;
+! We first estimate the reparameterized the mean vector and var-cov matrix of LVs
+!(i.e., the measure at the knot, the mean and the half difference of two slopes). 
+! mueta0s, mueta1s, and mueta2s are the means of such LVs;
+! psi0s0s, psi1s1s, and psi2s2s are the variances of such LVs;
+! psi0s1s, psi0s2s, and psi1s2s are the covariates of such LVs. 
+! theta is the residual variance
+MODEL:      eta0s BY Y1-Y10@1;
+            ! factor loadings for eta0s are set equal to 1
+            eta1s BY Y1* (L11)
+                     Y2* (L12)
+                     Y3* (L13)
+                     Y4* (L14)
+                     Y5* (L15)
+                     Y6* (L16)
+                     Y7* (L17)
+                     Y8* (L18)
+                     Y9* (L19)
+                     Y10* (L110);
+            eta2s BY Y1* (L21)
+                     Y2* (L22)
+                     Y3* (L23)
+                     Y4* (L24)
+                     Y5* (L25)
+                     Y6* (L26)
+                     Y7* (L27)
+                     Y8* (L28)
+                     Y9* (L29)
+                     Y10* (L210);
+            ! Factor loadings for eta1s and eta2s are not fixed values,
+            ! because they contain an estimate parameter, the fixed knot
+
+            ! Population values of parameters:
+            !! Original settings:
+            !! mueta0: 100, mueta1: -5, mueta2: -1.8, mug: 4.5
+            !! psi00: 25, psi01: 1.5, psi02: 1.5
+            !!            psi11: 1.0, psi12: 0.3
+            !!                        psi22: 1.0
+
+            !! Reparameterized settings:
+            !! mueta0s: 77.5, mueta1s: -3.4, mueta2s: 1.6, mug:4.5
+            !! psi0s0s: 58.750, psi0s1s: 4.425, psi0s2s: -1.575
+            !!                  psi1s1s: 0.650, psi1s2s: 0.000
+            !!                                  psi2s2s: 0.350
+            !! beta: 0.8849, 0.1770, 0.1770
+            !!       1.3274, 0.2655, 0.2655
+            
+            !! theta: 1.0
+
+            eta0s*58.75 (psi0s0s)
+            eta1s*0.65  (psi1s1s)
+            eta2s*0.35  (psi2s2s);
+
+            eta0s WITH eta1s (psi0s1s);
+            eta0s WITH eta2s (psi0s2s);
+            eta1s WITH eta2s (psi1s2s);
+
+            [eta0s*77.5]  (mueta0s);
+            [eta1s*-5.8]   (mueta1s);
+            [eta2s*-0.8]   (mueta2s);
+
+            eta0s on X1 (beta01s);
+            eta1s on X1 (beta11s);
+            eta2s on X1 (beta21s);
+
+            eta0s on X2 (beta02s);
+            eta1s on X2 (beta12s);
+            eta2s on X2 (beta22s);
+            
+            X1 X2;
+            [X1 X2];
+            X1 with X2;
+
+            Y1-Y10*2 (theta);
+            [Y1-Y10@0];
+
+MODEL CONSTRAINT: 
+            ! In the model constraint part, we have 3 parts:
+            ! Part I: Specify extra parameters other than those related to transformed LVs
+            new(mueta0 mueta1 mueta2 mug*4.5
+                psi00 psi01 psi02
+                      psi11 psi12
+                            psi22
+                beta01 beta11 beta21
+                beta02 beta12 beta22);
+            
+            ! Part II: Specify a series of equations to anti-transform the LVs
+            mueta0 = mueta0s + mug * (mueta2s - mueta1s);
+            mueta1 = mueta1s - mueta2s;
+            mueta2 = mueta1s + mueta2s;
+            psi00 = (psi1s1s + psi2s2s - 2 * psi1s2s) * mug^2 + 
+                     2 * (psi0s2s - psi0s1s) * mug + psi0s0s;
+            psi01 = (2 * psi1s2s - psi1s1s - psi2s2s) * mug + (psi0s1s - psi0s2s);
+            psi02 = (psi2s2s - psi1s1s) * mug + (psi0s1s + psi0s2s);
+            psi11 = psi1s1s + psi2s2s - 2 * psi1s2s;
+            psi12 = psi1s1s - psi2s2s;
+            psi22 = psi1s1s + psi2s2s + 2 * psi1s2s;
+
+            beta01 = beta01s + (beta21s - beta11s) * mug;
+            beta11 = beta11s - beta21s;
+            beta21 = beta11s + beta21s;
+
+            beta02 = beta02s + (beta22s - beta12s) * mug;
+            beta12 = beta12s - beta22s;
+            beta22 = beta12s + beta22s;
+
+            ! Part III: Define factor loadings for the 2nd and 3rd LVs with
+            ! definition variables
+            
+            L11 = T1 - mug;
+            L12 = T2 - mug;
+            L13 = T3 - mug;
+            L14 = T4 - mug;
+            L15 = T5 - mug;
+            L16 = T6 - mug;
+            L17 = T7 - mug;
+            L18 = T8 - mug;
+            L19 = T9 - mug;
+            L110 = T10 - mug;
+
+            L21 = sqrt((T1 - mug)^2);
+            L22 = sqrt((T2 - mug)^2);
+            L23 = sqrt((T3 - mug)^2);
+            L24 = sqrt((T4 - mug)^2);
+            L25 = sqrt((T5 - mug)^2);
+            L26 = sqrt((T6 - mug)^2);
+            L27 = sqrt((T7 - mug)^2);
+            L28 = sqrt((T8 - mug)^2);
+            L29 = sqrt((T9 - mug)^2);
+            L210 = sqrt((T10 - mug)^2);
+ OUTPUT:    SAMPSTAT;
+
+
+
+
+
+
+
+
+
+
+
+            

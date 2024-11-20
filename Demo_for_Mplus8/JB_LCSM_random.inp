@@ -1,0 +1,133 @@
+TITLE:      Jenss-Bayley LCSM with Random Growth Acceleration
+Data:       FILE = example_data.csv;
+VARIABLE:   NAMES = ID Y1-Y10 T1-T10; 
+            USEVAR = Y1-Y10;
+            CONSTRAINT = T1-T10;
+
+MODEL:      ! Latent true score
+            ly1 BY Y1@1;
+            ly2 BY Y2@1;
+            ly3 BY Y3@1;
+            ly4 BY Y4@1;
+            ly5 BY Y5@1;
+            ly6 BY Y6@1;
+            ly7 BY Y7@1;
+            ly8 BY Y8@1;
+            ly9 BY Y9@1;
+            ly10 BY Y10@1;
+
+            ly2-ly10@0;
+            [ly2-ly10@0];
+
+            !! Autoregressions
+            ly2 ON ly1@1;
+            ly3 ON ly2@1;
+            ly4 ON ly3@1;
+            ly5 ON ly4@1;
+            ly6 ON ly5@1;
+            ly7 ON ly6@1;
+            ly8 ON ly7@1;
+            ly9 ON ly8@1;
+            ly10 ON ly9@1;
+
+            !! Latent change scores
+            dy2 BY ly2* (lag2);
+            dy3 BY ly3* (lag3);
+            dy4 BY ly4* (lag4);
+            dy5 BY ly5* (lag5);
+            dy6 BY ly6* (lag6);
+            dy7 BY ly7* (lag7);
+            dy8 BY ly8* (lag8);
+            dy9 BY ly9* (lag9);
+            dy10 BY ly10* (lag10);
+            
+            dy2-dy10@0;
+            [dy2-dy10@0];
+
+            eta1 BY dy2-dy10@1;
+            eta2 BY dy2* (L22)
+                    dy3* (L23)
+                    dy4* (L24)
+                    dy5* (L25)
+                    dy6* (L26)
+                    dy7* (L27)
+                    dy8* (L28)
+                    dy9* (L29)
+                    dy10* (L210);
+            delta BY dy2* (L32)
+                     dy3* (L33)
+                     dy4* (L34)
+                     dy5* (L35)
+                     dy6* (L36)
+                     dy7* (L37)
+                     dy8* (L38)
+                     dy9* (L39)
+                     dy10* (L310);
+            
+            ! Population values of parameters:
+            !! mueta0: 50, mueta1: 2.5, mueta2: -30, mug: -0.7
+            !! psi00: 16, psi01: 1.2, psi02: 7.2, psi0g: 0.12
+            !!            psi11: 1.0, psi12: 1.8, psi1g: 0.03
+            !!                        psi22: 36, psi2g: 0.18
+            !!                                   psigg: 0.01
+            
+            !! theta: 1.0
+            ly1*16  (psi00);
+            eta1*1.0 (psi11);
+            eta2*36  (psi22);
+            delta*0.01 (psigg);
+
+            ly1 WITH eta1*1.2 (psi01);
+            ly1 WITH eta2*7.2 (psi02);
+            ly1 WITH delta*0.12 (psi0g);
+            eta1 WITH eta2*1.8 (psi12);
+            eta1 WITH delta*0.03 (psi1g);
+            eta2 WITH delta*0.18 (psi2g);
+
+            [ly1*50]  (mueta0);
+            [eta1*2.5] (mueta1);
+            [eta2*-30] (mueta2);
+
+            Y1-Y10*1.0 (theta);
+            [Y1-Y10@0];
+
+MODEL CONSTRAINT: 
+            ! In the model constraint, we have 4 parts:
+            ! Part I: Specify extra parameters other than those related to transformed LVs
+            new(mug*-0.7);
+
+            ! Part II: Define time lag of each time interval
+            lag2 = T2 - T1;
+            lag3 = T3 - T2;
+            lag4 = T4 - T3;
+            lag5 = T5 - T4;
+            lag6 = T6 - T5;
+            lag7 = T7 - T6;
+            lag8 = T8 - T7;
+            lag9 = T9 - T8;
+            lag10 = T10 - T9;
+
+            ! Part III: Define factor loadings for the 3rd and 4th LVs with
+            ! definition variables
+
+            L22 = mug * exp(mug * ((T1 + T2)/2));
+            L23 = mug * exp(mug * ((T2 + T3)/2));
+            L24 = mug * exp(mug * ((T3 + T4)/2));
+            L25 = mug * exp(mug * ((T4 + T5)/2));
+            L26 = mug * exp(mug * ((T5 + T6)/2));
+            L27 = mug * exp(mug * ((T6 + T7)/2));
+            L28 = mug * exp(mug * ((T7 + T8)/2));
+            L29 = mug * exp(mug * ((T8 + T9)/2));
+            L210 = mug * exp(mug * ((T9 + T10)/2));
+
+            L32 = (1 + mug * ((T1 + T2)/2)) * mueta2 * exp(mug * ((T1 + T2)/2));
+            L33 = (1 + mug * ((T2 + T3)/2)) * mueta2 * exp(mug * ((T2 + T3)/2));
+            L34 = (1 + mug * ((T3 + T4)/2)) * mueta2 * exp(mug * ((T3 + T4)/2));
+            L35 = (1 + mug * ((T4 + T5)/2)) * mueta2 * exp(mug * ((T4 + T5)/2));
+            L36 = (1 + mug * ((T5 + T6)/2)) * mueta2 * exp(mug * ((T5 + T6)/2));
+            L37 = (1 + mug * ((T6 + T7)/2)) * mueta2 * exp(mug * ((T6 + T7)/2));
+            L38 = (1 + mug * ((T7 + T8)/2)) * mueta2 * exp(mug * ((T7 + T8)/2));
+            L39 = (1 + mug * ((T8 + T9)/2)) * mueta2 * exp(mug * ((T8 + T9)/2));
+            L310 = (1 + mug * ((T9 + T10)/2)) * mueta2 * exp(mug * ((T9 + T10)/2));
+
+ OUTPUT:    SAMPSTAT;
