@@ -934,21 +934,6 @@ RMS_BLS_LGCM <- getMediation(
     ## 
     ## Beginning initial fit attempt
 
-    ## Running Longitudinal Mediation Model with Longitudinal Predictor, Bilinear Spline with 54 parameters
-
-    ## 
-    ##  Lowest minimum so far:  87688.8476080715
-
-    ##  OpenMx status code 6 not in list of acceptable status codes, (0)
-
-    ## 
-    ## Beginning fit attempt 1 of at maximum 10 extra tries
-
-    ## Running Longitudinal Mediation Model with Longitudinal Predictor, Bilinear Spline with 54 parameters
-
-    ## 
-    ##  Lowest minimum so far:  87688.8475912624
-
     ## 
     ## Solution found
 
