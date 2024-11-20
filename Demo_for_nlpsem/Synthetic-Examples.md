@@ -322,15 +322,7 @@ getEstimateStats(
 ```
 
     ## Running LCSM_TICs, Nonparametric Functional Form with 22 parameters
-
-    ## 
-    ## Beginning initial fit attempt
-
-    ## Running LCSM_TICs, Nonparametric Functional Form with 22 parameters
-
-    ## 
-    ##  Lowest minimum so far:  34575.4809438741
-
+    
     ## 
     ## Solution found
 
