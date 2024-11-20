@@ -347,17 +347,6 @@ getEstimateStats(
 
     ## Running LCSM_TICs, Nonparametric Functional Form with 22 parameters
 
-    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
-    ## dplyr 1.1.0.
-    ## ℹ Please use `reframe()` instead.
-    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
-    ##   always returns an ungrouped data frame and adjust accordingly.
-    ## ℹ The deprecated feature was likely used in the dplyr package.
-    ##   Please report the issue at <https://github.com/tidyverse/dplyr/issues>.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
     ## An object of class "StatsOutput"
     ## Slot "wald":
     ##                  Estimate      SE p.value wald_lbound wald_ubound
