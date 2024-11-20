@@ -1,0 +1,322 @@
+---
+title: "Synthetic Examples for R Package nlpsem"
+author: Jin Liu
+output: rmarkdown::github_document
+date: \today
+---
+
+```{r}
+library(nlpsem)
+devtools::load_all("../../Package/nlpsem")
+```
+
+
+# Example data
+```{r}
+# Load ECLS-K (2011) data
+data("RMS_dat")
+RMS_dat0 <- RMS_dat
+# Re-baseline the data so that the estimated initial status is for the
+# starting point of the study
+baseT <- RMS_dat0$T1; xstarts <- mean(baseT)
+RMS_dat0$T1 <- RMS_dat0$T1 - baseT
+RMS_dat0$T2 <- RMS_dat0$T2 - baseT
+RMS_dat0$T3 <- RMS_dat0$T3 - baseT
+RMS_dat0$T4 <- RMS_dat0$T4 - baseT
+RMS_dat0$T5 <- RMS_dat0$T5 - baseT
+RMS_dat0$T6 <- RMS_dat0$T6 - baseT
+RMS_dat0$T7 <- RMS_dat0$T7 - baseT
+RMS_dat0$T8 <- RMS_dat0$T8 - baseT
+RMS_dat0$T9 <- RMS_dat0$T9 - baseT
+# Standardize time-invariant covariates (TICs)
+## ex1 and ex2 are standardized growth TICs in models
+RMS_dat0$ex1 <- scale(RMS_dat0$Approach_to_Learning)
+RMS_dat0$ex2 <- scale(RMS_dat0$Attention_focus)
+## gx1 and gx2 are standardized cluster TICs in models
+RMS_dat0$gx1 <- scale(RMS_dat0$INCOME)
+RMS_dat0$gx2 <- scale(RMS_dat0$EDU)
+# Standardize time-varying covariate (TVC)
+BL_mean <- mean(RMS_dat0[, "R1"])
+BL_var <- var(RMS_dat0[, "R1"])
+RMS_dat0$Rs1 <- (RMS_dat0$R1 - BL_mean)/sqrt(BL_var)
+RMS_dat0$Rs2 <- (RMS_dat0$R2 - BL_mean)/sqrt(BL_var)
+RMS_dat0$Rs3 <- (RMS_dat0$R3 - BL_mean)/sqrt(BL_var)
+RMS_dat0$Rs4 <- (RMS_dat0$R4 - BL_mean)/sqrt(BL_var)
+RMS_dat0$Rs5 <- (RMS_dat0$R5 - BL_mean)/sqrt(BL_var)
+RMS_dat0$Rs6 <- (RMS_dat0$R6 - BL_mean)/sqrt(BL_var)
+RMS_dat0$Rs7 <- (RMS_dat0$R7 - BL_mean)/sqrt(BL_var)
+RMS_dat0$Rs8 <- (RMS_dat0$R8 - BL_mean)/sqrt(BL_var)
+RMS_dat0$Rs9 <- (RMS_dat0$R9 - BL_mean)/sqrt(BL_var)
+head(RMS_dat0)
+```
+
+## getLGCM example
+```{r}
+mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# LGCM_TICs, Bilinear Spline Functional Form, Random knot
+Math_LGCM_BLS_f <- getLGCM(
+  dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "bilinear spline",
+  intrinsic = TRUE, records = 1:9, growth_TIC = NULL, res_scale = 0.1
+)@mxOutput
+# LGCM_TICs, Bilinear Spline Functional Form, Fixed knot
+Math_LGCM_BLS_r <- getLGCM(
+  dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "bilinear spline",
+  intrinsic = FALSE, records = 1:9, growth_TIC = NULL, res_scale = 0.1
+)@mxOutput
+# Perform LRT to compare two models
+getLRT(full = Math_LGCM_BLS_f, reduced = Math_LGCM_BLS_r, boot = FALSE,
+       rep = NA)
+# Figure of Growth Status of LGCM_TICs, Bilinear Spline Functional Form, random knot
+Figure1 <- getFigure(
+  model = Math_LGCM_BLS_f, nClass = NULL, cluster_TIC = NULL, sub_Model = "LGCM",
+  y_var = "M", curveFun = "BLS", y_model = "LGCM", t_var = "T", records = 1:9,
+  m_var = NULL, x_var = NULL, x_type = NULL, xstarts = xstarts, xlab = "Month",
+  outcome = "Mathematics"
+)
+show(Figure1)
+# Figure of Growth Status of LGCM_TICs, Bilinear Spline Functional Form, fixed knot
+Figure2 <- getFigure(
+  model = Math_LGCM_BLS_r, nClass = NULL, cluster_TIC = NULL, sub_Model = "LGCM",
+  
+  y_var = "M", curveFun = "BLS", y_model = "LGCM", t_var = "T", records = 1:9,
+  m_var = NULL, x_var = NULL, x_type = NULL, xstarts = xstarts, xlab = "Month",
+  outcome = "Mathematics"
+)
+show(Figure2)
+```
+
+## getLCSM example
+```{r}
+mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# LCSM, Nonparametric Functional Form
+paraNonP_LCSM <- c(
+  "mueta0", "mueta1", paste0("psi", c("00", "01", "11")), paste0("rel_rate", 2:8),
+  "residuals", paste0("slp_val_est", 1:8), paste0("slp_var_est", 1:8),
+  paste0("chg_inv_val_est", 1:8), paste0("chg_inv_var_est", 1:8),
+  paste0("chg_bl_val_est", 1:8), paste0("chg_bl_var_est", 1:8)
+)
+Read_LCSM_NonP <- getLCSM(
+  dat = RMS_dat0, t_var = "T", y_var = "R", curveFun = "nonparametric",
+  intrinsic = FALSE, records = 1:9, growth_TIC = NULL, res_scale = 0.1, 
+  paramOut = TRUE, names = paraNonP_LCSM
+)@mxOutput
+# LCSM_TIC, Nonparametric Functional Form
+paraNonP_LCSM_TIC <- c(
+  "alpha0", "alpha1", paste0("psi", c("00", "01", "11")), paste0("rel_rate", 2:8),
+  "residuals", paste0("beta1", c(0:1)), paste0("beta2", c(0:1)),
+  paste0("mux", 1:2), paste0("phi", c("11", "12", "22")), "mueta0", "mueta1",
+  paste0("slp_val_est", 1:8), paste0("slp_var_est", 1:8),
+  paste0("chg_inv_val_est", 1:8), paste0("chg_inv_var_est", 1:8),
+  paste0("chg_bl_val_est", 1:8), paste0("chg_bl_var_est", 1:8)
+)
+Read_LCSM_NonP_TIC <- getLCSM(
+  dat = RMS_dat0, t_var = "T", y_var = "R", curveFun = "nonparametric",
+  intrinsic = FALSE, records = 1:9, growth_TIC = c("ex1", "ex2"), res_scale = 0.1, 
+  paramOut = TRUE, names = paraNonP_LCSM_TIC
+)
+Read_LCSM_NonP_TIC_o <- Read_LCSM_NonP_TIC@mxOutput
+Read_LCSM_NonP_TIC_e <- Read_LCSM_NonP_TIC@Estimates
+# Get summary of two LCSMs with Nonparametric Functional Form
+getSummary(model_list = list(Read_LCSM_NonP, Read_LCSM_NonP_TIC_o))
+# Figure of LCSM, Nonparametric Functional Form
+Figure3 <- getFigure(
+  model = Read_LCSM_NonP, sub_Model = "LCSM", y_var = "R", curveFun = "NonP", 
+  y_model = "LCSM", t_var = "T", records = 1:9, xstarts = xstarts, xlab = "Month",
+  outcome = "Reading"
+)
+show(Figure3)
+# Three types of confidence intervals of LCSM_TIC, Nonparametric Functional Form
+mxOption(model = NULL, key = "Default optimizer", "SLSQP", reset = FALSE)
+set.seed(20181022)
+getEstimateStats(
+  model = Read_LCSM_NonP_TIC_o, est_in = Read_LCSM_NonP_TIC_e, 
+  CI_type = "all", rep = 1000
+)
+```
+
+# getTVCmodel example
+```{r}
+mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# LGCM with TVC and TICs, Bilinear Spline Functional Form (random knot)
+set.seed(20191029)
+Math_TVC_BLS_f <- getTVCmodel(
+  dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "BLS", intrinsic = TRUE, 
+  records = 1:9, y_model = "LGCM", TVC = "Rs", decompose = 0, growth_TIC = "ex1", 
+  res_scale = 0.1, tries = 10
+)@mxOutput
+# LGCM with decomposed TVC and TICs, Bilinear Spline Functional Form (random knot)
+paraBLS_TVC.f <- c(
+  "Y_alpha0", "Y_alpha1", "Y_alpha2", "Y_alphag", 
+  paste0("Y_psi", c("00", "01", "02", "0g", "11", "12", "1g", "22", "2g", "gg")), 
+  "Y_residuals", "X_mueta0", "X_mueta1", paste0("X_psi", c("00", "01", "11")), 
+  paste0("X_rel_rate", 2:8), paste0("X_abs_rate", 1:8), "X_residuals",
+  paste0("betaTIC", c(0:2, "g")), paste0("betaTVC", c(0:2, "g")), "muTIC", "phiTIC", 
+  "Y_mueta0", "Y_mueta1", "Y_mueta2", "Y_mu_knot", "covBL", "kappa", "Cov_XYres"
+)
+set.seed(20191029)
+Math_TVCslp_BLS_f <- getTVCmodel(
+  dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "BLS", intrinsic = TRUE, 
+  records = 1:9, y_model = "LGCM", TVC = "Rs", decompose = 1, growth_TIC = "ex1", 
+  res_scale = c(0.1, 0.1), res_cor = 0.3, tries = 10, paramOut = TRUE, 
+  names = paraBLS_TVC.f
+) 
+Math_TVCslp_BLS_f_o <- Math_TVCslp_BLS_f@mxOutput
+Math_TVCslp_BLS_f_e <- Math_TVCslp_BLS_f@Estimates
+# Get Wald confidence intervals for LGCM with decomposed TVC and TICs, Bilinear 
+# Spline Functional Form (random knot)
+getEstimateStats(est_in = Math_TVCslp_BLS_f_e, CI_type = "Wald")
+# Figure of LGCM with TVC and TICs, Bilinear Spline Functional Form (random knot)
+Figure4 <- getFigure(
+  model = Math_TVC_BLS_f, sub_Model = "TVC", y_var = "M", curveFun = "BLS", 
+  y_model = "LGCM", t_var = "T", records = 1:9, xstarts = xstarts, xlab = "Month",
+  outcome = "Mathematics"
+)
+# Figure of LGCM with decomposed TVC and TICs, Bilinear Spline Functional Form (random knot)
+Figure5 <- getFigure(
+  model = Math_TVCslp_BLS_f_o, sub_Model = "TVC", y_var = "M", curveFun = "BLS", 
+  y_model = "LGCM", t_var = "T", records = 1:9, xstarts = xstarts, xlab = "Month",
+  outcome = "Mathematics"
+)
+show(Figure4)
+show(Figure5) 
+```
+
+# getMGM example
+```{r}
+mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# Multivariate Latent Growth Curve Model, Bilinear Spline (random knot)
+paraBLS_PLGCM_f <- c(
+  "Y_mueta0", "Y_mueta1", "Y_mueta2", "Y_knot", 
+  paste0("Y_psi", c("00", "01", "02", "0g", "11", "12", "1g", "22", "2g", "gg")), 
+  "Y_res",
+  "Z_mueta0", "Z_mueta1", "Z_mueta2", "Z_knot", 
+  paste0("Z_psi", c("00", "01", "02", "0g", "11", "12", "1g", "22", "2g", "gg")), 
+  "Z_res",
+  paste0("YZ_psi", c(c("00", "10", "20", "g0", "01", "11", "21", "g1",
+                       "02", "12", "22", "g2", "0g", "1g", "2g", "gg"))),
+  "YZ_res"
+)
+RM_PLGCM.f <- getMGM(
+  dat = RMS_dat0, t_var = c("T", "T"), y_var = c("R", "M"), curveFun = "BLS",
+  intrinsic = TRUE, records = list(1:9, 1:9), y_model = "LGCM", res_scale = 
+    c(0.1, 0.1), res_cor = 0.3, paramOut = TRUE, names = paraBLS_PLGCM_f
+)
+RM_PLGCM.f_o <- RM_PLGCM.f@mxOutput
+RM_PLGCM.f_e <- RM_PLGCM.f@Estimates
+# Get Wald confidence intervals of the constructed model
+getEstimateStats(est_in = RM_PLGCM.f_e, CI_type = "Wald")
+# Figure of the constructed model
+Figure6 <- getFigure(
+  model = RM_PLGCM.f_o, sub_Model = "MGM", y_var = c("R", "M"), curveFun = "BLS", 
+  y_model = "LGCM", t_var = c("T", "T"), records = list(1:9, 1:9), xstarts = 
+    xstarts, xlab = "Month", outcome = c("Reading", "Mathematics")
+)
+show(Figure6)
+```
+
+# getMediation example
+```{r}
+mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# Longitudinal Mediation Model with Baseline Predictor, Bilinear Spline
+paraMed2_BLS <- c(
+  "muX", "phi11", "alphaM1", "alphaMr", "alphaM2", "mugM",
+  paste0("psi", c("M1M1", "M1Mr", "M1M2", "MrMr", "MrM2", "M2M2"), "_r"),
+  "alphaY1", "alphaYr", "alphaY2", "mugY",
+  paste0("psi", c("Y1Y1", "Y1Yr", "Y1Y2", "YrYr", "YrY2", "Y2Y2"), "_r"),
+  paste0("beta", rep(c("M", "Y"), each = 3), rep(c(1, "r", 2), 2)),
+  paste0("beta", c("M1Y1", "M1Yr", "M1Y2", "MrYr", "MrY2", "M2Y2")),
+  "muetaM1", "muetaMr", "muetaM2", "muetaY1", "muetaYr", "muetaY2", 
+  paste0("Mediator", c("11", "1r", "12", "rr", "r2", "22")),
+  paste0("total", c("1", "r", "2")),
+  "residualsM", "residualsY", "residualsYM"
+)
+RM_BLS_LGCM <- getMediation(
+  dat = RMS_dat0, t_var = rep("T", 2), y_var = "M", m_var = "R", x_type = 
+    "baseline", x_var = "ex1", curveFun = "BLS", records = list(1:9, 1:9), 
+  res_scale = c(0.1, 0.1), 
+  res_cor = 0.3, paramOut = TRUE, names = paraMed2_BLS
+)
+# Get Wald confidence intervals for the constructed model
+getEstimateStats(est_in = RM_BLS_LGCM@Estimates, CI_type = "Wald")
+# Longitudinal Mediation Model with Longitudinal Predictor, Bilinear Spline
+paraMed3_BLS <- c(
+  "muetaX1", "muetaXr", "muetaX2", "mugX", 
+  paste0("psi", c("X1X1", "X1Xr", "X1X2", "XrXr", "XrX2", "X2X2")),
+  "alphaM1", "alphaMr", "alphaM2", "mugM", 
+  paste0("psi", c("M1M1", "M1Mr", "M1M2", "MrMr", "MrM2", "M2M2"), "_r"),
+  "alphaY1", "alphaYr", "alphaY2", "mugY", 
+  paste0("psi", c("Y1Y1", "Y1Yr", "Y1Y2", "YrYr", "YrY2", "Y2Y2"), "_r"),
+  paste0("beta", c("X1Y1", "X1Yr", "X1Y2", "XrYr", "XrY2", "X2Y2",
+                   "X1M1", "X1Mr", "X1M2", "XrMr", "XrM2", "X2M2",
+                   "M1Y1", "M1Yr", "M1Y2", "MrYr", "MrY2", "M2Y2")),
+  "muetaM1", "muetaMr", "muetaM2", "muetaY1", "muetaYr", "muetaY2", 
+  paste0("mediator", c("111", "11r", "112", "1rr", "1r2", "122", "rr2", 
+                       "r22", "rrr", "222")), paste0("total", c("11", "1r", "12", "rr", "r2", "22")),
+  "residualsX", "residualsM", "residualsY", 
+  "residualsMX", "residualsYX", "residualsYM"
+)
+set.seed(20191029)
+RMS_BLS_LGCM <- getMediation(
+  dat = RMS_dat0, t_var = rep("T", 3), y_var = "S", m_var = "M", x_type = 
+    "longitudinal", 
+  x_var = "R", curveFun = "bilinear spline", records = list(2:9, 1:9, 1:9), 
+  res_scale = c(0.1, 0.1, 0.1),  res_cor = c(0.3, 0.3), tries = 10, paramOut = 
+    TRUE, names = paraMed3_BLS)
+# Get Wald confidence intervals for the constructed model
+getEstimateStats(est_in = RMS_BLS_LGCM@Estimates, CI_type = "Wald")
+```
+
+# getMGroup example
+```{r}
+mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# Multiple group Growth Models
+MGroup_Math_BLS_LGCM_f <-  getMGroup(
+  dat = RMS_dat0, grp_var = "SEX", sub_Model = "LGCM", y_var = "M", t_var = "T",
+  records = 1:9, curveFun = "BLS", intrinsic = TRUE, res_scale = list(0.1, 0.1)
+)@mxOutput
+# Figure of the constructed model
+Figure7 <- getFigure(
+  model = MGroup_Math_BLS_LGCM_f, nClass = 2, cluster_TIC = NULL, grp_var = "SEX", 
+  sub_Model = "LGCM", y_var = "M", curveFun = "BLS", y_model = "LGCM", t_var = "T", 
+  records = 1:9, m_var = NULL, x_var = NULL, x_type = NULL, xstarts = xstarts, 
+  xlab = "Month", outcome = "Mathematics"
+)
+show(Figure7)
+```
+
+# getMIX example
+```{r}
+mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# LGCM, Bilinear Spline Functional Form (single group)
+Math_BLS_LGCM1 <- getLGCM(
+  dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "BLS", intrinsic = FALSE, 
+  records = 1:9, res_scale = 0.1
+)@mxOutput
+# Mixture Models without Cluster TICs (2 latent classes)
+Math_BLS_LGCM2 <-  getMIX(
+  dat = RMS_dat0, prop_starts = c(0.45, 0.55), sub_Model = "LGCM", y_var = "M", 
+  t_var = "T", records = 1:9, curveFun = "BLS", intrinsic = FALSE, 
+  res_scale = list(0.3, 0.3)
+)@mxOutput
+# Mixture Models without Cluster TICs (3 latent classes)
+set.seed(20191029)
+Math_BLS_LGCM3 <-  getMIX(
+  dat = RMS_dat0, prop_starts = c(0.33, 0.34, 0.33), sub_Model = "LGCM", 
+  y_var = "M", t_var = "T", records = 1:9, curveFun = "BLS", intrinsic = 
+    FALSE, res_scale = list(0.3, 0.3, 0.3), tries = 10
+)@mxOutput
+# Figure of Mixture Models with 3 latent classes
+Figure8 <- getFigure(
+  model = Math_BLS_LGCM3, nClass = 3, cluster_TIC = NULL, sub_Model = "LGCM",
+  y_var = "M", curveFun = "BLS", y_model = "LGCM", t_var = "T", records = 1:9,
+  m_var = NULL, x_var = NULL, x_type = NULL, xstarts = xstarts, xlab = "Month",
+  outcome = "Mathematics"
+)
+show(Figure8)
+getSummary(model_list = list(Math_BLS_LGCM1, Math_BLS_LGCM2, Math_BLS_LGCM3),
+           HetModels = TRUE)
+```
+
+
+
+
