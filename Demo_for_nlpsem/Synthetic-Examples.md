@@ -322,15 +322,7 @@ getEstimateStats(
 ```
 
     ## Running LCSM_TICs, Nonparametric Functional Form with 22 parameters
-
-    ## 
-    ## Beginning initial fit attempt
-
-    ## Running LCSM_TICs, Nonparametric Functional Form with 22 parameters
-
-    ## 
-    ##  Lowest minimum so far:  34575.4809438741
-
+    
     ## 
     ## Solution found
 
@@ -346,17 +338,6 @@ getEstimateStats(
     ## 2.85883409700569,-0.0307496026751804,2.1025663783895,0.0440098031099053,0.713676185595299,1.20587366575918,0.522769630143677,0.686992719429958,0.28881349104938,0.292348502506442,0.257050333099811,45.1410685313468,0.998000378893206,0.775938390248828,0.997999457539472,136.166031046614,-1.16963402927011,0.10763984621645,-7.99703749780419e-07,-8.27405384007255e-07,55.5595508202301,2.37720003925522
 
     ## Running LCSM_TICs, Nonparametric Functional Form with 22 parameters
-
-    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
-    ## dplyr 1.1.0.
-    ## ℹ Please use `reframe()` instead.
-    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
-    ##   always returns an ungrouped data frame and adjust accordingly.
-    ## ℹ The deprecated feature was likely used in the dplyr package.
-    ##   Please report the issue at <https://github.com/tidyverse/dplyr/issues>.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
     ## An object of class "StatsOutput"
     ## Slot "wald":
@@ -502,11 +483,6 @@ Math_TVC_BLS_f <- getTVCmodel(
     ## 
     ## Beginning initial fit attempt
 
-    ## Running LGCM with TVC and TICs, Bilinear Spline Functional Form (random knot) with 40 parameters
-
-    ## 
-    ##  Lowest minimum so far:  47225.9173820968
-
     ## 
     ## Solution found
 
@@ -540,21 +516,6 @@ Math_TVCslp_BLS_f <- getTVCmodel(
 
     ## 
     ## Beginning initial fit attempt
-
-    ## Running LGCM with decomposed TVC and TICs, Bilinear Spline Functional Form (random knot) with 41 parameters
-
-    ## 
-    ##  Lowest minimum so far:  42269.2433734459
-
-    ##  OpenMx status code 6 not in list of acceptable status codes, (0)
-
-    ## 
-    ## Beginning fit attempt 1 of at maximum 10 extra tries
-
-    ## Running LGCM with decomposed TVC and TICs, Bilinear Spline Functional Form (random knot) with 41 parameters
-
-    ## 
-    ##  Lowest minimum so far:  42269.2433725129
 
     ## 
     ## Solution found
@@ -973,21 +934,6 @@ RMS_BLS_LGCM <- getMediation(
     ## 
     ## Beginning initial fit attempt
 
-    ## Running Longitudinal Mediation Model with Longitudinal Predictor, Bilinear Spline with 54 parameters
-
-    ## 
-    ##  Lowest minimum so far:  87688.8476080715
-
-    ##  OpenMx status code 6 not in list of acceptable status codes, (0)
-
-    ## 
-    ## Beginning fit attempt 1 of at maximum 10 extra tries
-
-    ## Running Longitudinal Mediation Model with Longitudinal Predictor, Bilinear Spline with 54 parameters
-
-    ## 
-    ##  Lowest minimum so far:  87688.8475912624
-
     ## 
     ## Solution found
 
@@ -1181,11 +1127,6 @@ Math_BLS_LGCM3 <-  getMIX(
 
     ## 
     ## Beginning initial fit attempt
-
-    ## Running Mixture Models without Cluster TICs with 35 parameters
-
-    ## 
-    ##  Lowest minimum so far:  31008.2964752792
 
     ## 
     ## Solution found
